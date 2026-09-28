@@ -90,6 +90,13 @@ mongoose
 // ==========================================
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, function() {
-  console.log("Server inaendesha kwenye port " + PORT);
-});
+
+// Kwa maendeleo ya kawaida
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, function() {
+    console.log("Server inaendesha kwenye port " + PORT);
+  });
+}
+
+// Kwa Vercel (serverless)
+module.exports = app;
