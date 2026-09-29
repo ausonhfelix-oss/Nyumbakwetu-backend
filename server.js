@@ -14,6 +14,27 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Middleware: Kusubiri MongoDB iunganishwe
+app.use(async function(req, res, next) {
+  // Kama ni route ya properties, subiri MongoDB iunganishwe
+  if (req.path.startsWith("/api/properties") || 
+      req.path.startsWith("/api/favorites") ||
+      req.path.startsWith("/api/viewings")) {
+    
+    if (mongoose.connection.readyState !== 1) {
+      try {
+        await mongoose.connect(process.env.MONGO_URI);
+      } catch (err) {
+        return res.status(503).json({
+          kosa: "Database inaunganisha...",
+          maelezo: "Jaribu tena baada ya sekunde 2"
+        });
+      }
+    }
+  }
+  next();
+});
+
 // ==========================================
 // ROUTES
 // ==========================================
@@ -82,7 +103,7 @@ mongoose
     serverSelectionTimeoutMS: 30000,
     socketTimeoutMS: 45000,
     connectTimeoutMS: 30000,
-    bufferCommands: false,
+    bufferCommands: true,
     maxPoolSize: 10,
     autoIndex: false
   })
