@@ -14,47 +14,27 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Middleware: Kusubiri MongoDB iunganishwe
-app.use(async function(req, res, next) {
-  // Kama ni route ya properties, subiri MongoDB iunganishwe
-  if (req.path.startsWith("/api/properties") || 
-      req.path.startsWith("/api/favorites") ||
-      req.path.startsWith("/api/viewings")) {
-    
-    if (mongoose.connection.readyState !== 1) {
-      try {
-        await mongoose.connect(process.env.MONGO_URI);
-      } catch (err) {
-        return res.status(503).json({
-          kosa: "Database inaunganisha...",
-          maelezo: "Jaribu tena baada ya sekunde 2"
-        });
-      }
-    }
-  }
-  next();
-});
-
 // ==========================================
 // ROUTES
 // ==========================================
-// Auth routs
 const authRoutes = require("./routes/auth");
 app.use("/api/auth", authRoutes);
 
-//Property roots
 const propertyRoutes = require("./routes/properties");
 app.use("/api/properties", propertyRoutes);
 
-// Viewing routes 
 const viewingRoutes = require("./routes/Viewing");
 app.use("/api/viewings", viewingRoutes);
 
-// Favorite routes  
 const favoriteRoutes = require("./routes/Favorite");
 app.use("/api/favorites", favoriteRoutes);
 
-// Route ya kwanza (test)
+const uploadRoutes = require("./routes/upload");
+app.use("/api/upload", uploadRoutes);
+
+// ==========================================
+// ROUTE: Karibu (test)
+// ==========================================
 app.get("/", function(req, res) {
   res.json({
     ujumbe: "Karibu NyumbaKwetu API!",
@@ -63,7 +43,9 @@ app.get("/", function(req, res) {
   });
 });
 
-// Route ya kupima models (test)
+// ==========================================
+// ROUTE: Test (models)
+// ==========================================
 app.get("/api/test", async function(req, res) {
   try {
     const User = require("./models/User");
@@ -94,63 +76,10 @@ app.get("/api/test", async function(req, res) {
 });
 
 // ==========================================
-// MONGODB
+// ROUTE: Wakeup (cron job)
 // ==========================================
-
-// MongoDB Connection na Auto-Reconnect
-mongoose
-  .connect(process.env.MONGO_URI, {
-    serverSelectionTimeoutMS: 30000,
-    socketTimeoutMS: 45000,
-    connectTimeoutMS: 30000,
-    bufferCommands: true,
-    maxPoolSize: 10,
-    autoIndex: false
-  })
-  .then(function() {
-    console.log("OK - MongoDB imeunganishwa!");
-  })
-  .catch(function(err) {
-    console.error("ERROR MongoDB:", err.message);
-    // Jaribu tena baada ya sekunde 5
-    setTimeout(function() {
-      console.log("Inajaribu kuunganisha MongoDB tena...");
-      mongoose.connect(process.env.MONGO_URI).catch(console.error);
-    }, 5000);
-  });
-
-// Angalia connection events
-mongoose.connection.on("connected", function() {
-  console.log("MongoDB connected");
-});
-
-mongoose.connection.on("disconnected", function() {
-  console.log("MongoDB disconnected - inajaribu kuunganisha tena...");
-  setTimeout(function() {
-    mongoose.connect(process.env.MONGO_URI).catch(console.error);
-  }, 5000);
-});
-
-mongoose.connection.on("error", function(err) {
-  console.error("MongoDB error:", err.message);
-});
-// ==========================================
-// SERVER
-// ==========================================
-
-const PORT = process.env.PORT || 5000;
-
-// Kwa maendeleo ya kawaida
-if (process.env.NODE_ENV !== "production") {
-  app.listen(PORT, function() {
-    console.log("Server inaendesha kwenye port " + PORT);
-  });
-}
-
-// Route ya "kumwamsha" MongoDB (kwa cron jobs)
 app.get("/api/wakeup", async function(req, res) {
   try {
-    // Jaribu kuunganisha kama haijaunganishwa
     if (mongoose.connection.readyState !== 1) {
       await mongoose.connect(process.env.MONGO_URI);
     }
@@ -167,22 +96,51 @@ app.get("/api/wakeup", async function(req, res) {
   }
 });
 
-// Middleware: Kusubiri MongoDB iunganishwe kabla ya request yoyote
-app.use(async function(req, res, next) {
-  // Kama MongoDB haijaunganishwa, jaribu kuunganisha
-  if (mongoose.connection.readyState !== 1) {
-    try {
-      await mongoose.connect(process.env.MONGO_URI);
-      console.log("MongoDB connected (on demand)");
-    } catch (err) {
-      console.error("MongoDB connection error:", err.message);
-      return res.status(503).json({
-        kosa: "Database inaunganisha...",
-        maelezo: "Jaribu tena baada ya sekunde 2"
-      });
-    }
-  }
-  next();
+// ==========================================
+// MONGODB CONNECTION
+// ==========================================
+mongoose
+  .connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+    connectTimeoutMS: 30000,
+    bufferCommands: true,
+    maxPoolSize: 10,
+    autoIndex: false
+  })
+  .then(function() {
+    console.log("OK - MongoDB imeunganishwa!");
+  })
+  .catch(function(err) {
+    console.error("ERROR MongoDB:", err.message);
+  });
+
+mongoose.connection.on("connected", function() {
+  console.log("MongoDB connected");
 });
+
+mongoose.connection.on("disconnected", function() {
+  console.log("MongoDB disconnected - inajaribu kuunganisha tena...");
+  setTimeout(function() {
+    mongoose.connect(process.env.MONGO_URI).catch(console.error);
+  }, 5000);
+});
+
+mongoose.connection.on("error", function(err) {
+  console.log("MongoDB error:", err.message);
+});
+
+// ==========================================
+// SERVER
+// ==========================================
+const PORT = process.env.PORT || 5000;
+
+// Kwa maendeleo ya kawaida
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, function() {
+    console.log("Server inaendesha kwenye port " + PORT);
+  });
+}
+
 // Kwa Vercel (serverless)
 module.exports = app;
