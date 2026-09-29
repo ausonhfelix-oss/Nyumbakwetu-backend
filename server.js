@@ -166,5 +166,23 @@ app.get("/api/wakeup", async function(req, res) {
     });
   }
 });
+
+// Middleware: Kusubiri MongoDB iunganishwe kabla ya request yoyote
+app.use(async function(req, res, next) {
+  // Kama MongoDB haijaunganishwa, jaribu kuunganisha
+  if (mongoose.connection.readyState !== 1) {
+    try {
+      await mongoose.connect(process.env.MONGO_URI);
+      console.log("MongoDB connected (on demand)");
+    } catch (err) {
+      console.error("MongoDB connection error:", err.message);
+      return res.status(503).json({
+        kosa: "Database inaunganisha...",
+        maelezo: "Jaribu tena baada ya sekunde 2"
+      });
+    }
+  }
+  next();
+});
 // Kwa Vercel (serverless)
 module.exports = app;
