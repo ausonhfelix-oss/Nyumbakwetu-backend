@@ -76,15 +76,43 @@ app.get("/api/test", async function(req, res) {
 // MONGODB
 // ==========================================
 
+// MongoDB Connection na Auto-Reconnect
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+    connectTimeoutMS: 30000,
+    bufferCommands: false,
+    maxPoolSize: 10,
+    autoIndex: false
+  })
   .then(function() {
     console.log("OK - MongoDB imeunganishwa!");
   })
   .catch(function(err) {
     console.error("ERROR MongoDB:", err.message);
+    // Jaribu tena baada ya sekunde 5
+    setTimeout(function() {
+      console.log("Inajaribu kuunganisha MongoDB tena...");
+      mongoose.connect(process.env.MONGO_URI).catch(console.error);
+    }, 5000);
   });
 
+// Angalia connection events
+mongoose.connection.on("connected", function() {
+  console.log("MongoDB connected");
+});
+
+mongoose.connection.on("disconnected", function() {
+  console.log("MongoDB disconnected - inajaribu kuunganisha tena...");
+  setTimeout(function() {
+    mongoose.connect(process.env.MONGO_URI).catch(console.error);
+  }, 5000);
+});
+
+mongoose.connection.on("error", function(err) {
+  console.error("MongoDB error:", err.message);
+});
 // ==========================================
 // SERVER
 // ==========================================
@@ -98,5 +126,24 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 
+// Route ya "kumwamsha" MongoDB (kwa cron jobs)
+app.get("/api/wakeup", async function(req, res) {
+  try {
+    // Jaribu kuunganisha kama haijaunganishwa
+    if (mongoose.connection.readyState !== 1) {
+      await mongoose.connect(process.env.MONGO_URI);
+    }
+
+    res.json({
+      hali: "MongoDB ipo tayari",
+      readyState: mongoose.connection.readyState
+    });
+  } catch (error) {
+    res.status(500).json({
+      kosa: "Imeshindwa kuamsha MongoDB",
+      maelezo: error.message
+    });
+  }
+});
 // Kwa Vercel (serverless)
 module.exports = app;
