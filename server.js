@@ -142,5 +142,8 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 
+const adminRoutes = require("./routes/admin");
+app.use("/api/admin", adminRoutes);
+
 // Kwa Vercel (serverless)
 module.exports = app;

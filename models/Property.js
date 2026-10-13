@@ -109,11 +109,18 @@ const propertySchema = new mongoose.Schema(
     views: {
       type: Number,
       default: 0
-    }
-  },
-  {
-    timestamps: true
+
+    },
+
+  // ⭐ HALI YA NYUMBA (Inapatikana/Imepangishwa/Imeuzwa)
+  haliNyumba: {
+    type: String,
+    enum: ["Inapatikana", "Imepangishwa", "Imeuzwa"],
+    default: "Inapatikana"
   }
-);
+
+}, {
+  timestamps: true
+});
 
 module.exports = mongoose.model("Property", propertySchema);

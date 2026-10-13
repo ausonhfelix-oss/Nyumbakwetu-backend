@@ -310,4 +310,30 @@ router.delete(
     }
   }
 );
+
+// PUT /api/properties/:id/hali-nyumba
+router.put("/:id/hali-nyumba", lindaRoute, ruhusuAina("landlord", "admin"), async function (req, res) {
+  try {
+    const { haliNyumba } = req.body;
+    const nyumba = await Property.findById(req.params.id);
+
+    if (!nyumba) {
+      return res.status(404).json({ kosa: "Nyumba haipatikani" });
+    }
+
+    if (
+      req.mtumiaji.aina !== "admin" &&
+      String(nyumba.mmiliki) !== String(req.mtumiaji._id)
+    ) {
+      return res.status(403).json({ kosa: "Huna ruhusa" });
+    }
+
+    nyumba.haliNyumba = haliNyumba;
+    await nyumba.save();
+
+    res.json({ ujumbe: "Hali imebadilishwa", nyumba });
+  } catch (error) {
+    res.status(500).json({ kosa: "Imeshindikana kubadilisha", maelezo: error.message });
+  }
+});
 module.exports = router;
