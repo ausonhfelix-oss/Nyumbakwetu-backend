@@ -19,15 +19,16 @@ router.get("/users", lindaRoute, ruhusuAina("admin"), async function (req, res) 
 
     res.json({
       idadi: watumiaji.length,
-      watumiaji
+      watumiaji: watumiaji
     });
   } catch (error) {
+    console.error("Kosa:", error);
     res.status(500).json({ kosa: "Imeshindikana kupata watumiaji", maelezo: error.message });
   }
 });
 
 // ============================================
-// 2. TAKWIMU ZA JUMLA (Admin)
+// 2. TAKWIMU ZA JUMLA
 // GET /api/admin/stats
 // ============================================
 router.get("/stats", lindaRoute, ruhusuAina("admin"), async function (req, res) {
@@ -39,7 +40,7 @@ router.get("/stats", lindaRoute, ruhusuAina("admin"), async function (req, res) 
     const jumlaMaombi = await Viewing.countDocuments();
 
     res.json({
-      watumiaji: { jumla: jumlaWatumiaji, wapangaji, wamiliki },
+      watumiaji: { jumla: jumlaWatumiaji, wapangaji: wapangaji, wamiliki: wamiliki },
       nyumba: jumlaNyumba,
       maombi: jumlaMaombi
     });
@@ -55,6 +56,7 @@ router.get("/stats", lindaRoute, ruhusuAina("admin"), async function (req, res) 
 router.delete("/users/:id", lindaRoute, ruhusuAina("admin"), async function (req, res) {
   try {
     const mtumiaji = await User.findById(req.params.id);
+
     if (!mtumiaji) {
       return res.status(404).json({ kosa: "Mtumiaji haipatikani" });
     }
@@ -82,6 +84,7 @@ router.delete("/users/:id", lindaRoute, ruhusuAina("admin"), async function (req
       mtumiaji: { jina: mtumiaji.jina, email: mtumiaji.email }
     });
   } catch (error) {
+    console.error("Kosa:", error);
     res.status(500).json({ kosa: "Imeshindikana kufuta", maelezo: error.message });
   }
 });

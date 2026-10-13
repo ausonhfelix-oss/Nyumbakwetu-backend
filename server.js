@@ -142,8 +142,17 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 
-const adminRoutes = require("./routes/admin");
-app.use("/api/admin", adminRoutes);
+// Routes
+const authRoutes = require("./routes/auth");
+const propertyRoutes = require("./routes/properties");
+const uploadRoutes = require("./routes/upload");
+const viewingRoutes = require("./routes/Viewing");
+const adminRoutes = require("./routes/admin");       // ⭐ MPYA
 
+app.use("/api/auth", authRoutes);
+app.use("/api/properties", propertyRoutes);
+app.use("/api/upload", uploadRoutes);
+app.use("/api/viewings", viewingRoutes);
+app.use("/api/admin", adminRoutes);                    // ⭐ MPYA
 // Kwa Vercel (serverless)
 module.exports = app;
