@@ -1,7 +1,7 @@
 // routes/properties.js
 const express = require("express");
 const Property = require("../models/Property");
-const { lindaRoute, ruhusuAina } = require("../middleware/auth");
+const { lindaRoute, Aina } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -71,7 +71,7 @@ router.get("/:id", async function (req, res) {
 router.post(
   "/",
   lindaRoute,
-  ruhusuAina("landlord", "admin"),
+  ruhusuAina("landlord", "dalali", "admin"),
   async function (req, res) {
     try {
       console.log("========== POST /api/properties ==========");
@@ -82,6 +82,7 @@ router.post(
       const nyumbaMpya = new Property({
         ...req.body,
         mmiliki: req.mtumiaji._id,
+        mmilikiAina: req.mtumiaji.aina,
         hali: "Pending"
       });
 

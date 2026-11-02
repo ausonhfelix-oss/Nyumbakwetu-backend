@@ -112,6 +112,12 @@ const propertySchema = new mongoose.Schema(
 
     },
 
+    mmilikiAina: {
+      type: String,
+        enum: ["landlord","dalali","admin"],
+        default: "landlord"
+    },
+    
   // ⭐ HALI YA NYUMBA (Inapatikana/Imepangishwa/Imeuzwa)
   haliNyumba: {
     type: String,

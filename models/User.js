@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
     },
     aina: {
       type: String,
-      enum: ["tenant", "landlord", "admin"],
+      enum: ["tenant", "landlord", "admin", "dalali"],
       default: "tenant"
     },
     picha: {
