@@ -88,6 +88,10 @@ const propertySchema = new mongoose.Schema(
       type: [String],
       default: []
     },
+    video: {
+      type: String,
+      default: ""
+    },
     mmiliki: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
