@@ -14,10 +14,10 @@ const propertySchema = new mongoose.Schema(
       default: ""
     },
     aina: {
-      type: String,
-      enum: ["Nyumba", "Apartment", "Studio", "Hostel", "Single Room", "Biashara"],
-      required: true
-    },
+  type: String,
+  enum: ["Apartment", "Hostel", "Single Room", "Nyumba", "Kiwanja", "Viwanja", "Biashara", "Majengo ya Biashara"], // ⭐ Ongeza hizi
+  default: "Nyumba"
+},
     lengo: {
       type: String,
       enum: ["kupanga", "kuuza"],
